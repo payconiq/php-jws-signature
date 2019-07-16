@@ -129,7 +129,7 @@ class PayconiqJWSUtil {
         } else if (strcmp($environment, PayconiqJWSUtil::prodEnv) == 0) {
             return PayconiqJWSUtil::prodUrl;
         } else {
-            throw new Exception('Environment prameter must be \'ext\' or \'prod\'');
+            throw new Exception('Environment parameter must be \'ext\' or \'prod\'');
         }
     }
 
@@ -139,7 +139,7 @@ class PayconiqJWSUtil {
         } else if (strcmp($environment, PayconiqJWSUtil::prodEnv) == 0) {
             return PayconiqJWSUtil::prodKid;
         } else {
-            throw new Exception('Environment prameter must be \'ext\' or \'prod\'');
+            throw new Exception('Environment parameter must be \'ext\' or \'prod\'');
         }
     }
 
