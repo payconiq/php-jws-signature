@@ -4,7 +4,6 @@ require_once '../vendor/autoload.php';
 
 use Jose\Component\Core\AlgorithmManager;
 use Jose\Component\Core\JWK;
-use Jose\Component\Core\Converter\StandardConverter;
 use Jose\Component\Signature\Algorithm\ES256;
 use Jose\Component\Signature\JWSVerifier;
 use Jose\Component\Signature\Serializer\JWSSerializerManager;
@@ -18,7 +17,6 @@ use Jose\Component\Signature\Serializer\CompactSerializer;
 class PayconiqJWSUtil {
 
     //put your code here
-
     const algoES256 = 'ES256';
     const extUrl = 'https://ext.payconiq.com/certificates';
     const prodUrl = 'https://payconiq.com/certificates';
@@ -27,29 +25,23 @@ class PayconiqJWSUtil {
     const extEnv = 'ext';
     const prodEnv = 'prod';
 
-    public static function verifyJWS(string $environment, string $jws, string $payload): bool {
+    public static function verifyJWS(string $environment, string $jws, string $payload): bool
+    {
         try {
-            //echo 'Environment: ' . $environment . '<br>';
-            //echo 'JWS: ' . $jws . '<br>';
-            //echo 'Payload: ' . $payload . '<br><br>';
-
             $url = PayconiqJWSUtil::getUrl($environment);
             $kid = PayconiqJWSUtil::getKid($environment);
 
             $jwkJson = PayconiqJWSUtil::getJWKFromUrl($url, $kid);
             $key = JWK::createFromJson($jwkJson);
 
-            // The algorithm manager with the ES256 algorithm. 
-            $algorithm_manager = AlgorithmManager::create([new ES256(),]);
+            // The algorithm manager with the ES256 algorithm.
+            $algorithm_manager = new AlgorithmManager([new ES256()]);
 
             // We instantiate our JWS Verifier.
             $jwsVerifier = new JWSVerifier($algorithm_manager);
 
-            // The JSON Converter.
-            $jsonConverter = new StandardConverter();
-
             // The serializer manager. We only use the JWS Compact Serialization Mode.
-            $serializerManager = JWSSerializerManager::create([new CompactSerializer($jsonConverter),]);
+            $serializerManager = new JWSSerializerManager([new CompactSerializer()]);
 
             // We try to load the JWS.
             $jwsUserialized = $serializerManager->unserialize($jws);
@@ -63,13 +55,13 @@ class PayconiqJWSUtil {
             $isVerified = $jwsVerifier->verifyWithKey($jwsUserialized, $key, 0, $payload);
 
             return $isVerified;
-        } catch (Exception $ex) {
-            echo 'Exception occurred';
-            print_r($ex);
+        } catch (\Throwable $e) {
+            return false;
         }
     }
 
-    private static function getJWKFromUrl(string $url, string $kty): string {
+    private static function getJWKFromUrl(string $url, string $kty): string
+    {
         try {
             $curl = curl_init();
 
@@ -94,53 +86,54 @@ class PayconiqJWSUtil {
             } else {
                 return PayconiqJWSUtil::getJWK($response, $kty);
             }
-        } catch (Exception $ex) {
-            print_r($ex);
-            throw new Exception("Exception occurred while fetching JWKs");
+        } catch (\Throwable $ex) {
+            throw new \Exception("Exception occurred while fetching JWKs");
         }
     }
 
-    private static function getJWK(string $jwkParam, string $ktyString) {
+    private static function getJWK(string $jwkParam, string $ktyString)
+    {
         try {
             $array = json_decode($jwkParam, true);
             $keysArray = $array["keys"];
 
             foreach ($keysArray as $key => $value) {
                 if (strcmp($value["kid"], $ktyString) == 0) {
-                    return(json_encode($value));
+                    return (json_encode($value));
                 }
             }
             return null;
-        } catch (Exception $ex) {
-            print_r($ex);
-            throw new Exception("Unable to extract JWK from data \n");
+        } catch (\Throwable $ex) {
+            throw new \Exception("Unable to extract JWK from data \n");
         }
     }
 
-    private static function getAlgorithmManager(string $algorithm): AlgorithmManager {
+    private static function getAlgorithmManager(string $algorithm): AlgorithmManager
+    {
         if (strcmp($algorithm, PayconiqJWSUtil::algoES256) == 0) {
-            return AlgorithmManager::create([new ES256(),]);
+            return new AlgorithmManager([new ES256()]);
         }
     }
 
-    private static function getUrl(string $environment): string {
+    private static function getUrl(string $environment): string
+    {
         if (strcmp($environment, PayconiqJWSUtil::extEnv) == 0) {
             return PayconiqJWSUtil::extUrl;
         } else if (strcmp($environment, PayconiqJWSUtil::prodEnv) == 0) {
             return PayconiqJWSUtil::prodUrl;
         } else {
-            throw new Exception('Environment prameter must be \'ext\' or \'prod\'');
+            throw new \Exception('Environment prameter must be \'ext\' or \'prod\'');
         }
     }
 
-    private static function getKid(string $environment): string {
+    private static function getKid(string $environment): string
+    {
         if (strcmp($environment, PayconiqJWSUtil::extEnv) == 0) {
             return PayconiqJWSUtil::extKid;
         } else if (strcmp($environment, PayconiqJWSUtil::prodEnv) == 0) {
             return PayconiqJWSUtil::prodKid;
         } else {
-            throw new Exception('Environment prameter must be \'ext\' or \'prod\'');
+            throw new \Exception('Environment prameter must be \'ext\' or \'prod\'');
         }
     }
-
 }
