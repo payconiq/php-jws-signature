@@ -25,6 +25,18 @@ class PayconiqJWSUtil {
     const extEnv = 'ext';
     const prodEnv = 'prod';
 
+    class PayconiqJWSUtil
+{
+
+    //put your code here
+    const algoES256 = 'ES256';
+    const extUrl = 'https://ext.payconiq.com/certificates';
+    const prodUrl = 'https://payconiq.com/certificates';
+    const extKid = 'es.signature.ext.payconiq.com';
+    const prodKid = 'es.signature.payconiq.com';
+    const extEnv = 'ext';
+    const prodEnv = 'prod';
+
     public static function verifyJWS(string $environment, string $jws, string $payload): bool
     {
         try {
@@ -35,7 +47,7 @@ class PayconiqJWSUtil {
             $key = JWK::createFromJson($jwkJson);
 
             // The algorithm manager with the ES256 algorithm.
-            $algorithm_manager = new AlgorithmManager([new ES256()]);
+            $algorithm_manager = new AlgorithmManager([new ES256(),]);
 
             // We instantiate our JWS Verifier.
             $jwsVerifier = new JWSVerifier($algorithm_manager);
@@ -56,6 +68,7 @@ class PayconiqJWSUtil {
 
             return $isVerified;
         } catch (\Throwable $e) {
+            logger($e->getMessage());
             return false;
         }
     }
